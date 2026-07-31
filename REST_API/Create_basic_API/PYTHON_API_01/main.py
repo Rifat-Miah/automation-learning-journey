@@ -5,8 +5,9 @@ app = Flask(__name__)
 # Create Database
 
 #Create Routes
-
-
+@app.route("/")      # Home page route
+def home():
+    return "Home page root url connected."
 
 
 
