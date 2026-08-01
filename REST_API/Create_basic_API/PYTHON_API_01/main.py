@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -27,8 +27,12 @@ with app.app_context():    # create a db context manager
 #Create Routes
 @app.route("/")      # Home page route
 def home():
-    return "Home page root url connected."
+    return jsonify({"message": "Welcome to the RIFAT Travel API."})
 
+@app.route("/destinations", methods = ["GET"])
+def get_destinations():
+    destinations = Destination.query.all()
+    return jsonify([destination.to_dict()] for destination in destinations)
 
 
 if __name__ == "__main__":
