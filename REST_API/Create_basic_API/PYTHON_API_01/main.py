@@ -32,7 +32,7 @@ def home():
 @app.route("/destinations", methods = ["GET"])
 def get_destinations():
     destinations = Destination.query.all()
-    return jsonify([destination.to_dict()] for destination in destinations)
+    return jsonify([destination.to_dict() for destination in destinations])
 
 @app.route("/destinations/<int:destination_id>", methods = ["GET"])
 def get_destination(destination_id):
@@ -45,15 +45,31 @@ def get_destination(destination_id):
 #POST
 @app.route("/destinations", methods = "POST")
 def add_destination():
-    data = request.get_json()
+    data = request.get_json()  # parse
 
     new_destination = Destination(destination = data["destination"],
                                   contry = data["country"],
                                   rating = data["rating"])
-    db.session.add(new_destination)
+    db.session.add(new_destination)    # insert new object
     db.session.commit()
 
     return jsonify(new_destination.to_dict()), 201
+
+# PUT (Update)
+@app.route("destinations/<int:destination_id>", methods = ["PUT"])
+def update_destination(destination_id):
+    data = request.get_json()
+
+    destination = Destination.query.get(destination_id)
+    if destination:
+        destination.destination = data.get("destination", destination.destination)   # create properties use dot ( . )
+        destination.country = data.get("country", destination.country)
+        destination.rating = data.get("rating", destination.rating)
+
+        db.session.commit()
+        return jsonify(destination.to_dict())
+    else:
+        return jsonify({"error": "Destination  not Found."}), 404
 
 if __name__ == "__main__":
     app.run(debug = True)
