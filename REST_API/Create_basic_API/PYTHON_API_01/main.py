@@ -43,12 +43,12 @@ def get_destination(destination_id):
         return jsonify({"error": "Destination Not Found!"}), 404
 
 #POST
-@app.route("/destinations", methods = "POST")
+@app.route("/destinations", methods= ["POST"])
 def add_destination():
     data = request.get_json()  # parse
 
     new_destination = Destination(destination = data["destination"],
-                                  contry = data["country"],
+                                  country = data["country"],
                                   rating = data["rating"])
     db.session.add(new_destination)    # insert new object
     db.session.commit()
@@ -56,7 +56,7 @@ def add_destination():
     return jsonify(new_destination.to_dict()), 201
 
 # PUT (Update)
-@app.route("destinations/<int:destination_id>", methods = ["PUT"])
+@app.route("/destinations/<int:destination_id>", methods = ["PUT"])
 def update_destination(destination_id):
     data = request.get_json()
 
@@ -71,5 +71,15 @@ def update_destination(destination_id):
     else:
         return jsonify({"error": "Destination  not Found."}), 404
 
+# DELETE
+@app.route("/destinations/<int:destination_id>", methods= ["DELETE"])
+def delete_destination(destination_id):
+    destination = Destination.query.get(destination_id)
+    if destination:
+        db.session.delete(destination)
+        db.session.commit()
+        return jsonify({"message": "Destination deleted successfully!"})
+    else:
+        return jsonify({"error": "Destination not deleted."}), 404
 if __name__ == "__main__":
     app.run(debug = True)
