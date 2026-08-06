@@ -4,7 +4,6 @@ from typing import Dict, Optional, Tuple
 from datetime import datetime
 import logging
 from config import get_config
-
 logger = logging.getLogger(__name__)
 config = get_config
 
@@ -113,9 +112,71 @@ class WeatherService:       # fetching and processing weather data
         temp_unit = '°C' if units == 'metric' else '°F'
         speed_unit = 'm/s' if units == 'metric' else 'mph'
 
+        #convert Timestamps
+        sunrise = datetime.fromtimestamp(data['sys']['sunrise']).strftime('%Y-%m-%d %H:%M:%S')
+        sunset = datetime.fromtimestamp(data['sys']['sunset']).strftime('%Y-%m-%d %H:%M:%S')
+        current_time = datetime.fromtimestamp(data['dt']).strftime('%Y-%m-%d %H:%M:%S')
 
+        # Format weather data
+        formatted = {
+            'city': data['name'],
+            'country': data['sys']['country'],
+            'coordinates': {
+                'lat': data['coord']['lat'],
+                'lon': data['coord']['lon']
+            },
+            'temperature': {
+                'current': round(data['main']['temp'],1 ),
+                'feels_like': round(data['main']['feels_like'], 1),
+                'min': round(data['main']['temp_min', 1]),
+                'max': round(data['main']['temp_max', 1]),
+                'unit': temp_unit
+            },
+            'humidity': data['main']['humididty'],
+            'pressure': data['main']['pressure'],
+            'wind': {
+                'speed': round(data['wind']['speed'], 1),
+                'degree': data['wind'].get('deg'),
+                'unit': speed_unit
+            },
+            'clouds': data['clouds']['all'],
+            'weather': {
+                'main': data['weather'][0]['main'],
+                'description':data['weather'][0]['description'].capitalize(),
+                'icon': data['weather'][0]['icon']
+            },
+            'sunrise': sunrise,
+            'sunset': sunset,
+            'current_time': current_time,
+            'units': units,
+            'raw': data  # Keep raw data for debugging/advanced use
+        }
+        return formatted
 
-
-
-
+    def validate_city(self, city: str) -> bool:
+        """
+        Validate if a city exists (without fetching full weather data)
+        Args:
+            city: City name to validate
             
+        Returns:
+            True if city exists, False otherwise
+        """
+        try:
+            params= {
+                'q': city,
+                'appid': self.api_key,
+                'limit': 1
+            }
+            response = requests.get(
+                'http://api.openweathermap.org/geo/1.0/direct',
+                params=params,
+                timeout=5
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return len(data) > 0
+            return False
+        except Exception:
+            return False
