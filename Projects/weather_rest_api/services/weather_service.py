@@ -59,7 +59,60 @@ class WeatherService:       # fetching and processing weather data
         except requests.Timeout as e:
             logger.error(f"Connection Error: {str(e)}")
             raise TimeoutError("Request timed out. Please try again later.")
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {str(e)}")
+            raise ValueError("Invalid response received from weather service.")
+        except Exception as e:
+            logger.error(f"Unexpected error in get_weather: {str(e)}")
+            raise
+    def get_weather_by_coordinates(self, lat: float, lon: float, units: str = 'metric') -> Dict:
+        """
+        Fetch weather data using latitude and longitude
+        Args:
+            lat: Latitude
+            lon: Longitude
+            units: 'metric' or 'imperial'
+            
+        Returns:
+            Dict containing formatted weather data
+        """
+        try:
+            logger.debug(f"Fetching weather for coordinates: ({lat}, {lon}), units: {units}")
+            params = {
+                'lat': lat,
+                'lon': lon,
+                'appid': self.api_key,
+                'units': units
+            }
+
+            response = requests.get(
+                self.base_url,
+                params=params,
+                timeout=10
+            )
+
+            response.raise_for_status()
+            data = response.json()
+            return self._format_weather_data(data, units)
+        except requests.RequestException as e:
+            logger.error(f"Error fetching weather by coordinates: {str(e)}")
+            raise
+
+    def _format_weather_data(self, data: Dict, units: str) -> Dict:
+        """
+        Format raw weather API response into a clean, structured dictionary
         
+        Args:
+            data: Raw weather data from API
+            units: 'metric' or 'imperial'
+            
+        Returns:
+            Formatted weather data dictionary
+        """
+        # Determine units
+        temp_unit = '°C' if units == 'metric' else '°F'
+        speed_unit = 'm/s' if units == 'metric' else 'mph'
+
 
 
 
