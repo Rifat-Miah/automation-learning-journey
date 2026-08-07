@@ -82,3 +82,80 @@ class WeatherDatabase:    #JSON Based Database for Weather History
     
     def get_history_count(self) -> int:  #Get total number of history records
         return len(self.data)
+
+    def delete_history_item(self, index: int) -> bool:
+        """
+        Delete a specific history item by index
+        Args:
+            index: Index of the item to delete
+            
+        Returns:
+            True if deleted, False if not found
+        """
+        try:
+            if 0 <= index < len(self.data):
+                deleted = self.data.pop(index)
+                # Reindex remaining items
+                for i, item in enumerate(self.data):
+                    item['id'] = i
+                self._save_data()
+                logger.info(f"Deleted history item at index {index}")
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error deleting history item: {e}")
+            return False
+    def clear_history(self):
+        self.data = []
+        self._save_data()
+        logger.info("Cleared all weather history")
+
+    def search_by_city(self, city: str) -> List[Dict]:
+        """
+        Search history by city name (case-insensitive)
+        Args:
+            city: City name to search for
+            
+        Returns:
+            List of matching history records
+        """
+        city_lower = city.lower()
+        return [
+            item for item in self.data
+            if item.get('city', '').lower() == city_lower
+        ]
+    
+    def get_statistics(self) -> Dict:
+        """
+        Get statistics about the weather history
+        
+        Returns:
+            Dictionary with statistics
+        """
+        if not self.data:
+            return {
+                'total_entries': 0,
+                'unique_cities': 0,
+                'most_searched_city': None,
+                'avg_temperature': None
+            }   
+        city_counts = {}  # count cities
+        temps = []
+        for item in self.data:
+            city = item.get('city', 'Unknown')
+            city_counts[city] = city_counts.get(city, 0) + 1
+            
+            # Get temperature
+            temp_data = item.get('data', {}).get('temperature', {})
+            if temp_data:
+                temps.append(temp_data.get('current', 0))
+        
+        most_searched = max(city_counts.items(), key=lambda x: x[1]) if city_counts else None
+        
+        return {
+            'total_entries': len(self.data),
+            'unique_cities': len(city_counts),
+            'most_searched_city': most_searched[0] if most_searched else None,
+            'most_searched_count': most_searched[1] if most_searched else 0,
+            'avg_temperature': sum(temps) / len(temps) if temps else None
+        }
