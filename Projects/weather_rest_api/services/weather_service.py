@@ -128,11 +128,11 @@ class WeatherService:       # fetching and processing weather data
             'temperature': {
                 'current': round(data['main']['temp'],1 ),
                 'feels_like': round(data['main']['feels_like'], 1),
-                'min': round(data['main']['temp_min', 1]),
-                'max': round(data['main']['temp_max', 1]),
+                'min': round(data['main']['temp_min'], 1),
+                'max': round(data['main']['temp_max'], 1),
                 'unit': temp_unit
             },
-            'humidity': data['main']['humididty'],
+            'humidity': data['main']['humidity'],
             'pressure': data['main']['pressure'],
             'wind': {
                 'speed': round(data['wind']['speed'], 1),
