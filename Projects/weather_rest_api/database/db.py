@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from config import Config
 
-logger = logging.getlogger(__name__)
+logger = logging.getLogger(__name__)
 
 class WeatherDatabase:    #JSON Based Database for Weather History
     def __init__(self):   #Initialize the database
@@ -29,7 +29,7 @@ class WeatherDatabase:    #JSON Based Database for Weather History
         except Exception as e:
             logger.error(f"Unexpected error loading data: {e}")
             self.data = []
-    def save_data(self):     # Save data to JSON file
+    def _save_data(self):     # Save data to JSON file
         try:
             Config.DATA_DIR.mkdir(exist_ok=True) # Ensure directory exists
             with open(self.data_file, 'w', encoding='utf-8') as f:

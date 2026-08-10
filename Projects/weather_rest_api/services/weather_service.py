@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from config import get_config
 logger = logging.getLogger(__name__)
-config = get_config
+config = get_config()
 
 class WeatherService:       # fetching and processing weather data
     def __init__(self):
@@ -55,7 +55,7 @@ class WeatherService:       # fetching and processing weather data
             data = response.json()
             return self._format_weather_data(data, units)              # Format and return weather data
 
-        except requests.Timeout as e:
+        except requests.exceptions.Timeout as e:
             logger.error(f"Connection Error: {str(e)}")
             raise TimeoutError("Request timed out. Please try again later.")
         except json.JSONDecodeError as e:

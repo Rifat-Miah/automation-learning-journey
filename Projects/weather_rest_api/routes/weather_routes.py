@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 weather_service = WeatherService()  #Initialize services
 weather_db = WeatherDatabase()
 
-@weather_bp.route('/', methods=['GET'])
+@weather_bp.route('', methods=['GET'])
 def get_weather():
     """
     Get weather for a city
@@ -18,12 +18,10 @@ def get_weather():
         city: City name (required)
         units: 'metric' or 'imperial' (optional, default: metric)
     """
+    city = request.args.get('city')
     try:
-        # Get parameters
-        city = request.args.get('city')
         units = request.args.get('units', 'metric')
         
-        # Validate city
         if not city:
             return jsonify({
                 'success': False,
@@ -31,7 +29,6 @@ def get_weather():
                 'message': 'Please provide a city name'
             }), 400
         
-        # Validate units
         if units not in ['metric', 'imperial']:
             return jsonify({
                 'success': False,
