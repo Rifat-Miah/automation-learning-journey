@@ -14,7 +14,7 @@ logging.basicConfig(
         logging.fileHandler(Config.LOG_FILE) if Config.LOG_FILE else logging.NullHandler()
     ]
 )
-logging = logging.grtLogger(__name__)
+logging = logging.getLogger(__name__)
 
 #Initialize Flask app
 app = Flask(__name__)
