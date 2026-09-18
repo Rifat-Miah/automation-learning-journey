@@ -3,7 +3,7 @@ from services.weather_service import WeatherService
 from database.db import WeatherDatabase
 import logging
 
-weather_bp = Blueprint('weather', __name__) #Create blueprint
+weather_bp = Blueprint('weather', __name__, url_prefix='/api/weather') #Create blueprint
 logger = logging.getLogger(__name__)
 
 weather_service = WeatherService()  #Initialize services
@@ -256,3 +256,15 @@ def update_settings():
             'error': 'Failed to update settings',
             'message': str(e)
         }), 500
+@weather_bp.route('/health', methods=['GET'])
+def health_check():
+    """
+    GET /api/weather/health
+    Health check endpoint
+    """
+    from utils.helper import ResponseBuilder
+    return ResponseBuilder.success({
+        'status': 'healthy',
+        'service': 'weather-api',
+        'version': '1.0.0'
+    }, 'Health check passed', 200)
