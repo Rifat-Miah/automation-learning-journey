@@ -1,29 +1,99 @@
-import sys
-import logging
-from pathlib import Path
 from flask import Flask, jsonify
 from flask_cors import CORS
-from config import Config, get_config
+import logging
+import os
+from datetime import datetime
 
-# logging setup
-logging.basicConfig(                
-    level = logging.INFO,
+# Import configurations and modules
+from config import get_config, Config
+from routes.weather_routes import weather_bp
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers = [
-        logging.StreamHandler(sys.stdout),
-        logging.fileHandler(Config.LOG_FILE) if Config.LOG_FILE else logging.NullHandler()
+    handlers=[
+        logging.FileHandler('weather_api.log'),
+        logging.StreamHandler()
     ]
 )
-logging = logging.getLogger(__name__)
 
-#Initialize Flask app
-app = Flask(__name__)
-#Load Configuration
-config = get_config()
-app.config.from_object(config)
+logger = logging.getLogger(__name__)
 
-CORS(app, origins=config.CORS_ORIGINS)    #Enable CORS(app, ...) adds the needed security rules to your Flask app.
+def create_app():
+    #Application factory pattern for creating Flask app
+    # Get configuration
+    config = get_config()
+    
+    # Validate configuration
+    try:
+        config.validate()
+        config.ensure_directories()
+    except ValueError as e:
+        logger.error(f"Configuration error: {e}")
+        raise
+    
+    # Create Flask app
+    app = Flask(__name__)
+    
+    # Configure app
+    app.config['SECRET_KEY'] = config.SECRET_KEY
+    app.config['DEBUG'] = config.DEBUG
+    app.config['CORS_ORIGINS'] = config.CORS_ORIGINS
+    
+    # Enable CORS
+    CORS(app, origins=config.CORS_ORIGINS)
+    
+    # Register blueprints
+    app.register_blueprint(weather_bp)
+    
+    # Root endpoint
+    @app.route('/')
+    def index():
+        return jsonify({
+            'name': 'Weather REST API',
+            'version': '1.0.0',
+            'status': 'running',
+            'endpoints': {
+                'weather': '/api/weather?city=London',
+                'coordinates': '/api/weather/coordinates?lat=51.5&lon=-0.1',
+                'history': '/api/weather/history',
+                'health': '/api/weather/health'
+            },
+            'documentation': 'See README.md for API documentation'
+        })
+    
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            'success': False,
+            'error': 'Endpoint not found',
+            'message': 'The requested endpoint does not exist'
+        }), 404
+    
+    @app.errorhandler(500)
+    def internal_error(error):
+        logger.error(f"Internal server error: {error}")
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error',
+            'message': 'An unexpected error occurred'
+        }), 500
+    
+    logger.info("Weather API application initialized successfully")
+    return app
 
-#Enable register bluprints
-from routes.weather_routes import weather_bp
-app.register_blueprint(weather_bp, url_prefix='/api/weather')
+if __name__ == '__main__':
+    # Get configuration
+    config = get_config()
+    
+    # Create app
+    app = create_app()
+    
+    # Run the application
+    app.run(
+        host=config.HOST,
+        port=config.PORT,
+        debug=config.DEBUG
+    )
