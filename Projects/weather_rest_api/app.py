@@ -21,7 +21,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def create_app():
-    #Application factory pattern for creating Flask app
+    #Application factory pattern for creating Flask app 
     # Get configuration
     config = get_config()
     

@@ -1,0 +1,41 @@
+[
+  {
+    "id": 0,
+    "city": "London",
+    "units": "metric",
+    "timestamp": "2026-08-04T22:30:15.123456",
+    "data": {
+      "city": "London",
+      "country": "GB",
+      "coordinates": {
+        "lat": 51.5074,
+        "lon": -0.1278
+      },
+      "temperature": {
+        "current": 20.5,
+        "feels_like": 19.8,
+        "min": 18.0,
+        "max": 22.0,
+        "unit": "°C"
+      },
+      "humidity": 65,
+      "pressure": 1012,
+      "wind": {
+        "speed": 4.2,
+        "degree": 180,
+        "unit": "m/s"
+      },
+      "clouds": 20,
+      "weather": {
+        "main": "Clear",
+        "description": "Clear sky",
+        "icon": "01d"
+      },
+      "sunrise": "2026-08-04 05:30:00",
+      "sunset": "2026-08-04 20:45:00",
+      "current_time": "2026-08-04 22:30:15",
+      "units": "metric"
+    },
+    "summary": "Clear sky - 20.5°C"
+  }
+]
